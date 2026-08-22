@@ -348,6 +348,7 @@
 
   "automations.title": "Automations",
   "automations.emptyFilter": "No automations match your filters.",
+  "automations.section.generalLabel": "General",
   "automations.section.hide.hero": "hide Overview",
   "automations.section.show.hero": "show Overview",
   "automations.section.hideMobile.hero": "hide Overview on mobile",
@@ -554,6 +555,10 @@
   "settings.appearance.accent.label": "Accent colour",
   "settings.appearance.accent.reset": "reset",
   "settings.appearance.accent.hueAria": "Accent hue",
+
+  "settings.language.label": "Language",
+  "settings.language.groupAria": "Language",
+  "settings.language.auto": "Auto",
 
   "settings.entities.searchPlaceholder": "search by name or id…",
   "settings.entities.searchAria": "Search entities",

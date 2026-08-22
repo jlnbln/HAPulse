@@ -10,7 +10,7 @@ import { EditBadge } from '../components/ui/EditBadge';
 import { HeightHandle, HeightDots, heightClass, getHeightLevel } from '../components/ui/SectionResize';
 import { EditToggle } from '../components/ui/EditToggle';
 import { PageHeaderActions } from '../components/ui/PageHeaderActions';
-import { useT, type TKey } from '../i18n/useT';
+import { useT, useLocale, type TKey, type TFunction } from '../i18n/useT';
 import { useEntitiesByDomain } from '../ha/hooks';
 import { useSettingsStore } from '../stores/settingsStore';
 import { useUIStore } from '../stores/uiStore';
@@ -43,6 +43,14 @@ function idToCategory(sectionId: string, categories: string[]): string {
     categories.find((c) => c.toLowerCase().replace(/\s+/g, '_') === slug) ??
     (slug.charAt(0).toUpperCase() + slug.slice(1))
   );
+}
+
+/** Display-only translation of the `'General'` fallback category. The raw
+ *  `'General'` string is what `categoryToId()` persists as a section id, so it
+ *  must stay untranslated at the source — only render call sites go through
+ *  this helper (mirrors Scenes.tsx's `scenes.section.generalLabel`). */
+function categoryDisplayLabel(t: TFunction, category: string): string {
+  return category === 'General' ? t('automations.section.generalLabel') : category;
 }
 
 // ── Column-span system (mirrors Home.tsx) ─────────────────────────────────────
@@ -167,6 +175,7 @@ const FIXED_TOGGLE_KEYS: Record<string, ToggleKeys> = {
 
 export function Automations() {
   const t = useT();
+  const locale = useLocale();
   const automations = useEntitiesByDomain('automation');
   const editMode    = useUIStore((s) => s.editMode);
   const registries  = useEntityStore((s) => s.registries);
@@ -219,13 +228,13 @@ export function Automations() {
 
     const opts: FilterOption[] = [...present]
       .map((id) => ({ value: id, label: areaName.get(id) ?? id }))
-      .sort((x, y) => x.label.localeCompare(y.label));
+      .sort((x, y) => x.label.localeCompare(y.label, locale));
 
     return { roomOptions: opts, automationArea: map };
-  }, [registries, automations]);
+  }, [registries, automations, locale]);
 
   // Category dropdown options derived from the existing `categories` array
-  const categoryOptions: FilterOption[] = categories.map((c) => ({ value: c, label: c }));
+  const categoryOptions: FilterOption[] = categories.map((c) => ({ value: c, label: categoryDisplayLabel(t, c) }));
 
   // Whether any filter is active (controls flat-list vs. section grid)
   const filterActive = search.trim() !== '' || roomFilter !== '' || categoryFilter !== '';
@@ -301,7 +310,7 @@ export function Automations() {
         showMobile: t(fixed.showMobile),
       };
     }
-    const label = idToCategory(id, categories);
+    const label = categoryDisplayLabel(t, idToCategory(id, categories));
     return {
       hide: t('automations.section.hideCategory', { label }),
       show: t('automations.section.showCategory', { label }),
@@ -319,7 +328,7 @@ export function Automations() {
     }
     const catName  = idToCategory(id, categories);
     const catAutos = automations.filter((e) => getCategory(e) === catName);
-    return <AutomationCategoryCard category={catName} automations={catAutos} />;
+    return <AutomationCategoryCard category={categoryDisplayLabel(t, catName)} automations={catAutos} />;
   }
 
   return (
@@ -350,7 +359,7 @@ export function Automations() {
             {[...new Set(filteredAutomations.map(getCategory))].sort().map((cat) => (
               <div key={cat} className="overview-grid__cell overview-grid__cell--span-2">
                 <AutomationCategoryCard
-                  category={cat}
+                  category={categoryDisplayLabel(t, cat)}
                   automations={filteredAutomations.filter((a) => getCategory(a) === cat)}
                 />
               </div>

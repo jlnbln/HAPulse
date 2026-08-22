@@ -348,6 +348,7 @@
 
   "automations.title": "Automatiseringar",
   "automations.emptyFilter": "Inga automatiseringar matchar dina filter.",
+  "automations.section.generalLabel": "Allmänt",
   "automations.section.hide.hero": "dölj Översikt",
   "automations.section.show.hero": "visa Översikt",
   "automations.section.hideMobile.hero": "dölj Översikt på mobil",
@@ -554,6 +555,10 @@
   "settings.appearance.accent.label": "Accentfärg",
   "settings.appearance.accent.reset": "återställ",
   "settings.appearance.accent.hueAria": "Accentnyans",
+
+  "settings.language.label": "Språk",
+  "settings.language.groupAria": "Språk",
+  "settings.language.auto": "Auto",
 
   "settings.entities.searchPlaceholder": "sök på namn eller id…",
   "settings.entities.searchAria": "Sök entiteter",

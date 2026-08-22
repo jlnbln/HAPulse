@@ -8,7 +8,7 @@ import { useShallow } from 'zustand/react/shallow';
 import {
   Github, ExternalLink,
   ChevronDown, ChevronRight,
-  Wifi, Hash, Sun, Palette, Download, Upload, Info,
+  Wifi, Hash, Sun, Palette, Download, Upload, Info, Languages,
   LayoutGrid, Pencil, List, ShieldCheck,
 } from 'lucide-react';
 
@@ -19,11 +19,12 @@ import { useUIStore } from '../stores/uiStore';
 import { useRooms, useCurrentUserAvatar, useCanEdit } from '../ha/hooks';
 import { THEMES, THEME_NAMES, resolveMode } from '../theme/themes';
 import type { ThemeName, ThemeMode } from '../theme/themes';
-import type { Room, HassEntity } from '@hapulse/core';
+import { LOCALES, LOCALE_LABELS } from '@hapulse/core';
+import type { Room, HassEntity, Locale } from '@hapulse/core';
 import { isDefaultPersistenceAdapter } from '../persistence';
 
 import { useT } from '../i18n/useT';
-import type { TKey } from '../i18n/useT';
+import type { TKey, TFunction } from '../i18n/useT';
 import { Card } from '../components/ui/Card';
 import { Modal } from '../components/ui/Modal';
 import { SectionLabel } from '../components/ui/SectionLabel';
@@ -42,7 +43,7 @@ import './Settings.css';
 
 const VALID_THEMES = new Set<string>([...THEME_NAMES, 'dusk', 'dawn', 'midnight', 'sage']);
 
-function validateImport(data: unknown, t: (key: TKey, vars?: Record<string, string | number>) => string): string | null {
+function validateImport(data: unknown, t: TFunction): string | null {
   if (typeof data !== 'object' || data === null) return t('settings.backup.error.notObject');
   const d = data as Record<string, unknown>;
   if (d['theme'] !== undefined && !VALID_THEMES.has(String(d['theme']))) {
@@ -82,7 +83,7 @@ function statusDotClass(status: StoreStatus): string {
   }
 }
 
-function statusLabel(status: StoreStatus, demo: boolean, t: (key: TKey) => string): string {
+function statusLabel(status: StoreStatus, demo: boolean, t: TFunction): string {
   if (demo) return t('settings.status.demo');
   switch (status) {
     case 'connected':    return t('settings.status.connected');
@@ -298,6 +299,17 @@ function AppearanceSection() {
     { id: 'auto', labelKey: 'settings.appearance.mode.auto' },
   ];
 
+  const language = useSettingsStore((s) => s.language);
+  const setLanguage = useSettingsStore((s) => s.setLanguage);
+
+  // Locale entries show each language's own native name (LOCALE_LABELS is not
+  // translated — "Svenska" reads the same regardless of UI language), so only
+  // the 'auto' entry resolves through a translation key at render time.
+  const LANGUAGE_OPTIONS: { id: Locale | 'auto'; labelKey?: TKey; label?: string }[] = [
+    { id: 'auto', labelKey: 'settings.language.auto' },
+    ...LOCALES.map((l) => ({ id: l, label: LOCALE_LABELS[l] })),
+  ];
+
   return (
     <section className="settings-page__section">
       <SectionLabel>{t('settings.section.appearance')}</SectionLabel>
@@ -320,6 +332,29 @@ function AppearanceSection() {
                 aria-pressed={mode === m.id}
               >
                 {t(m.labelKey)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Language row */}
+        <div className="settings-card__row settings-card__row--inline">
+          <span className="settings-card__row-label">
+            <span className="settings-card__icon-chip" style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}>
+              <Languages size={14} strokeWidth={1.75} />
+            </span>
+            {t('settings.language.label')}
+          </span>
+          <div className="mode-toggle" role="group" aria-label={t('settings.language.groupAria')}>
+            {LANGUAGE_OPTIONS.map((l) => (
+              <button
+                key={l.id}
+                type="button"
+                className={`mode-toggle__btn${language === l.id ? ' mode-toggle__btn--active' : ''}`}
+                onClick={() => setLanguage(l.id)}
+                aria-pressed={language === l.id}
+              >
+                {l.labelKey ? t(l.labelKey) : l.label}
               </button>
             ))}
           </div>

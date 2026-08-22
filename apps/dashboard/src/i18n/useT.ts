@@ -21,6 +21,10 @@ export function useT() {
   );
 }
 
+/** Canonical type for the `t` function returned by `useT()`, for call sites
+ *  (helpers, components) that need to accept it as a parameter. */
+export type TFunction = ReturnType<typeof useT>;
+
 /** The resolved locale, for Intl.DateTimeFormat / NumberFormat call sites.
  *  Hook: call it in a component body only — utility functions take `locale`
  *  as a parameter instead. */
