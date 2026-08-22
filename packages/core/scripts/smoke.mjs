@@ -13,6 +13,7 @@
  *  - resolveThemeMode / accentOverride pure theme math
  *  - buildHAAuthorizeUrl / exchangeHAAuthCode / connectWithAuthData (mobile OAuth)
  *  - HAConnection.suspend is exported
+ *  - translate() / resolveLanguage() and en/sv dictionary parity
  */
 
 import {
@@ -47,6 +48,8 @@ import {
   translate,
   resolveLanguage,
 } from '../dist/index.js';
+import EN_DICT from '../../../apps/dashboard/src/i18n/locales/en.json' with { type: 'json' };
+import SV_DICT from '../../../apps/dashboard/src/i18n/locales/sv.json' with { type: 'json' };
 
 let passed = 0;
 let failed = 0;
@@ -547,31 +550,31 @@ const FR = {
   'devices.count.other': '{count} appareils',
 };
 
-assertEqual(translate(EN, EN, 'en', 'nav.devices'), 'Devices', 'clé simple');
-assertEqual(translate(FR, EN, 'fr', 'nav.devices'), 'Appareils', 'clé traduite');
+assertEqual(translate(EN, EN, 'en', 'nav.devices'), 'Devices', 'simple key');
+assertEqual(translate(FR, EN, 'fr', 'nav.devices'), 'Appareils', 'translated key');
 
-// Repli : dictionnaire cible incomplet → anglais
+// Fallback: incomplete target dictionary → English
 assertEqual(translate(FR, EN, 'fr', 'greeting', { name: 'Bap' }), 'Hello Bap',
-  'repli sur en quand la clé manque dans la locale');
+  'falls back to en when the key is missing in the locale');
 
-// Repli ultime : la clé elle-même, jamais un écran vide
+// Ultimate fallback: the key itself, never a blank screen
 assertEqual(translate(EN, EN, 'en', 'inconnue.totale'), 'inconnue.totale',
-  'repli sur la clé quand elle est introuvable partout');
+  'falls back to the key when it is nowhere to be found');
 
-// Interpolation : variable absente laissée visible, pour repérer le bug
+// Interpolation: an unprovided variable is left visible, to spot the bug
 assertEqual(translate(EN, EN, 'en', 'greeting'), 'Hello {name}',
-  'variable non fournie laissée telle quelle');
+  'unprovided variable left as-is');
 
-// Pluriels anglais
-assertEqual(translate(EN, EN, 'en', 'devices.count', { count: 1 }), '1 device', 'en, count=1 → singulier');
-assertEqual(translate(EN, EN, 'en', 'devices.count', { count: 2 }), '2 devices', 'en, count=2 → pluriel');
-assertEqual(translate(EN, EN, 'en', 'devices.count', { count: 0 }), '0 devices', 'en, count=0 → pluriel');
+// English plurals
+assertEqual(translate(EN, EN, 'en', 'devices.count', { count: 1 }), '1 device', 'en, count=1 → singular');
+assertEqual(translate(EN, EN, 'en', 'devices.count', { count: 2 }), '2 devices', 'en, count=2 → plural');
+assertEqual(translate(EN, EN, 'en', 'devices.count', { count: 0 }), '0 devices', 'en, count=0 → plural');
 
-// Pluriels français : le cas qui attrape les vraies régressions.
-// En français 0 et 1 prennent le SINGULIER, contrairement à l'anglais.
-assertEqual(translate(FR, EN, 'fr', 'devices.count', { count: 0 }), '0 appareil', 'fr, count=0 → singulier');
-assertEqual(translate(FR, EN, 'fr', 'devices.count', { count: 1 }), '1 appareil', 'fr, count=1 → singulier');
-assertEqual(translate(FR, EN, 'fr', 'devices.count', { count: 2 }), '2 appareils', 'fr, count=2 → pluriel');
+// French plurals: the case that catches real regressions.
+// In French, 0 and 1 both take the SINGULAR, unlike English.
+assertEqual(translate(FR, EN, 'fr', 'devices.count', { count: 0 }), '0 appareil', 'fr, count=0 → singular');
+assertEqual(translate(FR, EN, 'fr', 'devices.count', { count: 1 }), '1 appareil', 'fr, count=1 → singular');
+assertEqual(translate(FR, EN, 'fr', 'devices.count', { count: 2 }), '2 appareils', 'fr, count=2 → plural');
 
 // Non-integer and negative count values
 assertEqual(translate(EN, EN, 'en', 'devices.count', { count: -1 }), '-1 device', 'en, count=-1 → singular (negative)');
@@ -590,28 +593,71 @@ console.log('\n── i18n: resolveLanguage ──');
 
 const AVAIL = ['en', 'fr'];
 
-// Une préférence explicite gagne sur tout le reste
-assertEqual(resolveLanguage('fr', 'en', ['en-US'], AVAIL), 'fr', 'préférence explicite prioritaire');
+// An explicit preference wins over everything else
+assertEqual(resolveLanguage('fr', 'en', ['en-US'], AVAIL), 'fr', 'explicit preference takes priority');
 
-// auto : la langue de HA d'abord
-assertEqual(resolveLanguage('auto', 'fr', ['en-US'], AVAIL), 'fr', 'auto → langue HA');
+// auto: HA's language first
+assertEqual(resolveLanguage('auto', 'fr', ['en-US'], AVAIL), 'fr', 'auto → HA language');
 
-// auto : navigator en second, quand HA ne dit rien
+// auto: navigator second, when HA says nothing
 assertEqual(resolveLanguage('auto', null, ['fr-FR', 'en'], AVAIL), 'fr', 'auto → navigator');
 
-// Les balises régionales sont réduites à la langue de base
+// Regional tags are reduced to the base language
 assertEqual(resolveLanguage('auto', 'fr-CA', [], AVAIL), 'fr', 'fr-CA → fr');
 
-// Une langue HA non supportée ne doit pas gagner : on continue la chaîne
+// An unsupported HA language must not win: the chain continues
 assertEqual(resolveLanguage('auto', 'de', ['fr-FR'], AVAIL), 'fr',
-  'langue HA non supportée → on passe à navigator');
+  'unsupported HA language → falls through to navigator');
 
-// Dernier recours
-assertEqual(resolveLanguage('auto', 'de', ['ja-JP'], AVAIL), 'en', 'aucune correspondance → en');
-assertEqual(resolveLanguage('auto', null, [], AVAIL), 'en', 'aucune information → en');
+// Last resort
+assertEqual(resolveLanguage('auto', 'de', ['ja-JP'], AVAIL), 'en', 'no match → en');
+assertEqual(resolveLanguage('auto', null, [], AVAIL), 'en', 'no information → en');
 
-// Une préférence explicite devenue indisponible ne doit pas bloquer l'UI
-assertEqual(resolveLanguage('fr', null, [], ['en']), 'en', 'préférence indisponible → en');
+// An explicit preference that became unavailable must not block the UI
+assertEqual(resolveLanguage('fr', null, [], ['en']), 'en', 'unavailable preference → en');
+
+// ---------------------------------------------------------------------------
+// i18n — dictionary parity (en/sv)
+// ---------------------------------------------------------------------------
+console.log('\n── i18n: en/sv parity ──');
+
+const enKeys = Object.keys(EN_DICT).sort();
+const svKeys = Object.keys(SV_DICT).sort();
+
+const missingInSv = enKeys.filter((k) => !svKeys.includes(k));
+const extraInSv = svKeys.filter((k) => !enKeys.includes(k));
+
+assert(missingInSv.length === 0, `sv.json must not omit anything (missing: ${missingInSv.join(', ') || 'none'})`);
+assert(extraInSv.length === 0, `sv.json must not add anything (extra: ${extraInSv.join(', ') || 'none'})`);
+
+// Placeholders must survive translation
+const dictPlaceholders = (s) => (s.match(/\{(\w+)\}/g) ?? []).sort().join(',');
+for (const k of enKeys) {
+  assertEqual(dictPlaceholders(SV_DICT[k] ?? ''), dictPlaceholders(EN_DICT[k]), `placeholders preserved for "${k}"`);
+}
+
+// Every .one key has a matching .other and vice versa, in both dictionaries —
+// a lone .one/.other silently resolves to the raw key for the other plural
+// category, which reads as a missing translation rather than a loud failure.
+for (const [label, dict] of [['en', EN_DICT], ['sv', SV_DICT]]) {
+  const keys = Object.keys(dict);
+  const ones = keys.filter((k) => k.endsWith('.one'));
+  const others = keys.filter((k) => k.endsWith('.other'));
+  const oneWithoutOther = ones.filter((k) => !dict[`${k.slice(0, -4)}.other`]);
+  const otherWithoutOne = others.filter((k) => !dict[`${k.slice(0, -6)}.one`]);
+  assert(oneWithoutOther.length === 0, `${label}.json: every .one has a matching .other (missing: ${oneWithoutOther.join(', ') || 'none'})`);
+  assert(otherWithoutOne.length === 0, `${label}.json: every .other has a matching .one (missing: ${otherWithoutOne.join(', ') || 'none'})`);
+}
+
+// Every value containing {count} belongs to a .one/.other pair — a plural
+// placeholder outside that shape means the plural category was never selected.
+for (const [label, dict] of [['en', EN_DICT], ['sv', SV_DICT]]) {
+  for (const [k, v] of Object.entries(dict)) {
+    if (v.includes('{count}') && !k.endsWith('.one') && !k.endsWith('.other')) {
+      assert(false, `${label}.json: "${k}" contains {count} but is not a .one/.other key`);
+    }
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Finish (after ticker or timeout)

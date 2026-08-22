@@ -11,6 +11,7 @@ import { useSettingsStore } from '../stores/settingsStore';
 import { useConnectionStore } from '../stores/connectionStore';
 import { getLanguage } from '../ha/config';
 import en from './locales/en.json';
+import sv from './locales/sv.json';
 
 export interface I18nValue {
   locale: Locale;
@@ -25,7 +26,7 @@ export const I18nContext = createContext<I18nValue>({
 });
 
 /** Dictionaries by locale. */
-const DICTS: Record<Locale, Dict> = { en };
+const DICTS: Record<Locale, Dict> = { en, sv };
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const pref = useSettingsStore((s) => s.language);

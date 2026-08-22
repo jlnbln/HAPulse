@@ -592,7 +592,8 @@
   "settings.about.tagline": "made for home assistant — open source, self-hosted.",
 
   "devices.hero.title": "All Devices",
-  "devices.hero.deviceCount": "{count} devices",
+  "devices.hero.deviceCount.one": "{count} device",
+  "devices.hero.deviceCount.other": "{count} devices",
   "devices.hero.roomCount.one": "{count} room",
   "devices.hero.roomCount.other": "{count} rooms",
   "devices.hero.stat.integrations": "Integrations",
