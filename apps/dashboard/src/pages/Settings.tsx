@@ -8,7 +8,7 @@ import { useShallow } from 'zustand/react/shallow';
 import {
   Github, ExternalLink,
   ChevronDown, ChevronRight,
-  Wifi, Hash, Sun, Palette, Download, Upload, Info, Languages,
+  Wifi, Hash, Sun, Palette, Download, Upload, Info, Languages, Type, EyeOff, Shapes,
   LayoutGrid, Pencil, List, ShieldCheck,
 } from 'lucide-react';
 
@@ -30,6 +30,7 @@ import { Modal } from '../components/ui/Modal';
 import { SectionLabel } from '../components/ui/SectionLabel';
 import { UserAvatar } from '../components/ui/UserAvatar';
 import { ThemeSwatch } from '../components/settings/ThemeSwatch';
+import { PulseLogo, APP_ICON_IDS, type AppIconId } from '../components/ui/PulseLogo';
 import { RoomRow } from '../components/settings/RoomRow';
 import { EntityRow } from '../components/settings/EntityRow';
 import { PageHeaderActions } from '../components/ui/PageHeaderActions';
@@ -246,14 +247,35 @@ function ConnectionSection() {
 // Section: Appearance
 // ---------------------------------------------------------------------------
 
+const APP_ICON_LABEL_KEYS: Record<AppIconId, TKey> = {
+  pulse: 'settings.appearance.appIcon.pulse',
+  home: 'settings.appearance.appIcon.home',
+  sparkles: 'settings.appearance.appIcon.sparkles',
+  zap: 'settings.appearance.appIcon.zap',
+  star: 'settings.appearance.appIcon.star',
+  heart: 'settings.appearance.appIcon.heart',
+  flame: 'settings.appearance.appIcon.flame',
+  leaf: 'settings.appearance.appIcon.leaf',
+};
+
 function AppearanceSection() {
   const t = useT();
-  const { theme, mode, accentHue } = useSettingsStore(
-    useShallow((s) => ({ theme: s.theme, mode: s.mode, accentHue: s.accentHue }))
+  const { theme, mode, accentHue, appName, appIcon, appIconHidden } = useSettingsStore(
+    useShallow((s) => ({
+      theme: s.theme, mode: s.mode, accentHue: s.accentHue,
+      appName: s.appName, appIcon: s.appIcon, appIconHidden: s.appIconHidden,
+    }))
   );
   const setTheme = useSettingsStore((s) => s.setTheme);
   const setMode = useSettingsStore((s) => s.setMode);
   const setAccentHue = useSettingsStore((s) => s.setAccentHue);
+  const setAppName = useSettingsStore((s) => s.setAppName);
+  const setAppIcon = useSettingsStore((s) => s.setAppIcon);
+  const setAppIconHidden = useSettingsStore((s) => s.setAppIconHidden);
+
+  const activeIcon: AppIconId = (APP_ICON_IDS as readonly string[]).includes(appIcon ?? '')
+    ? (appIcon as AppIconId)
+    : 'pulse';
 
   const resolved = resolveMode(mode);
 
@@ -314,6 +336,63 @@ function AppearanceSection() {
     <section className="settings-page__section">
       <SectionLabel>{t('settings.section.appearance')}</SectionLabel>
       <Card className="settings-card">
+        {/* App name row */}
+        <div className="settings-card__row">
+          <div className="settings-card__row-label">
+            <span className="settings-card__icon-chip" style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}>
+              <Type size={14} strokeWidth={1.75} />
+            </span>
+            {t('settings.appearance.appName.label')}
+          </div>
+          <input
+            type="text"
+            className="settings-text-input"
+            placeholder="HAPulse"
+            value={appName ?? ''}
+            onChange={(e) => setAppName(e.target.value)}
+            maxLength={40}
+            aria-label={t('settings.appearance.appName.label')}
+          />
+        </div>
+
+        {/* App icon row */}
+        <div className="settings-card__row">
+          <div className="settings-card__row-label">
+            <span className="settings-card__icon-chip" style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}>
+              <Shapes size={14} strokeWidth={1.75} />
+            </span>
+            {t('settings.appearance.appIcon.label')}
+          </div>
+          <div className="icon-swatch-row" role="group" aria-label={t('settings.appearance.appIcon.label')}>
+            <button
+              type="button"
+              className={`icon-swatch icon-swatch--none${appIconHidden ? ' icon-swatch--active' : ''}`}
+              onClick={() => setAppIconHidden(true)}
+              aria-pressed={appIconHidden}
+              aria-label={t('settings.appearance.appIcon.none')}
+              title={t('settings.appearance.appIcon.none')}
+            >
+              <EyeOff size={16} strokeWidth={1.75} />
+            </button>
+            {APP_ICON_IDS.map((id) => (
+              <button
+                key={id}
+                type="button"
+                className={`icon-swatch${!appIconHidden && activeIcon === id ? ' icon-swatch--active' : ''}`}
+                onClick={() => {
+                  setAppIconHidden(false);
+                  setAppIcon(id === 'pulse' ? undefined : id);
+                }}
+                aria-pressed={!appIconHidden && activeIcon === id}
+                aria-label={t(APP_ICON_LABEL_KEYS[id]!)}
+                title={t(APP_ICON_LABEL_KEYS[id]!)}
+              >
+                <PulseLogo size={24} icon={id} />
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Mode row */}
         <div className="settings-card__row settings-card__row--inline">
           <span className="settings-card__row-label">

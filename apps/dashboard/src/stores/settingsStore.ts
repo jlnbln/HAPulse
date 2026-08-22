@@ -134,6 +134,12 @@ interface SettingsState {
   accentHue?: number | undefined;
   customization: CustomizationSettings;
   userName?: string | undefined;
+  /** Custom sidebar wordmark, shown instead of "HAPulse" when set. */
+  appName?: string | undefined;
+  /** Sidebar logo glyph id (see PulseLogo's APP_ICON_IDS). Undefined/unrecognised → the default heartbeat. */
+  appIcon?: string | undefined;
+  /** If true, the sidebar logo glyph is omitted (wordmark only). */
+  appIconHidden: boolean;
   /** Desktop sidebar collapsed to an icon-only rail. */
   sidebarCollapsed: boolean;
   /** Display language. 'auto' resolves from Home Assistant, then the browser. */
@@ -145,6 +151,9 @@ interface SettingsActions {
   setMode: (mode: ThemeMode) => void;
   setAccentHue: (hue: number | undefined) => void;
   setUserName: (name: string) => void;
+  setAppName: (name: string) => void;
+  setAppIcon: (icon: string | undefined) => void;
+  setAppIconHidden: (hidden: boolean) => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
   updateCustomization: (patch: Partial<CustomizationSettings>) => void;
   exportSettings: () => string;
@@ -210,6 +219,9 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       accentHue: undefined,
       customization: DEFAULT_CUSTOMIZATION,
       userName: undefined,
+      appName: undefined,
+      appIcon: undefined,
+      appIconHidden: false,
       sidebarCollapsed: false,
       language: 'auto',
 
@@ -233,6 +245,18 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         set({ userName });
       },
 
+      setAppName(appName) {
+        set({ appName });
+      },
+
+      setAppIcon(appIcon) {
+        set({ appIcon });
+      },
+
+      setAppIconHidden(appIconHidden) {
+        set({ appIconHidden });
+      },
+
       setSidebarCollapsed(sidebarCollapsed) {
         set({ sidebarCollapsed });
       },
@@ -244,9 +268,9 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       },
 
       exportSettings() {
-        const { theme, mode, accentHue, customization, userName, sidebarCollapsed, language } = get();
+        const { theme, mode, accentHue, customization, userName, appName, appIcon, appIconHidden, sidebarCollapsed, language } = get();
         return JSON.stringify(
-          { theme, mode, accentHue, customization, userName, sidebarCollapsed, language },
+          { theme, mode, accentHue, customization, userName, appName, appIcon, appIconHidden, sidebarCollapsed, language },
           null,
           2
         );
@@ -300,6 +324,9 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
               favorites,
             },
             userName: data.userName,
+            appName: data.appName,
+            appIcon: data.appIcon,
+            appIconHidden: typeof data.appIconHidden === 'boolean' ? data.appIconHidden : false,
             sidebarCollapsed: typeof data.sidebarCollapsed === 'boolean' ? data.sidebarCollapsed : false,
             language,
           });

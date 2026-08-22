@@ -310,6 +310,9 @@ export function AppLayout({ children }: AppLayoutProps) {
   const sidebarCollapsed  = useSettingsStore((s) => s.sidebarCollapsed);
   const setSidebarCollapsed = useSettingsStore((s) => s.setSidebarCollapsed);
   const updateCustomization = useSettingsStore((s) => s.updateCustomization);
+  const appName = useSettingsStore((s) => s.appName);
+  const appIcon = useSettingsStore((s) => s.appIcon);
+  const appIconHidden = useSettingsStore((s) => s.appIconHidden);
 
   const editMode = useUIStore((s) => s.editMode);
 
@@ -623,7 +626,13 @@ export function AppLayout({ children }: AppLayoutProps) {
       >
         {/* Logo / wordmark */}
         <div className="app-sidebar__header">
-          <PulseLogo size={32} wordmark={!sidebarCollapsed} />
+          <PulseLogo
+            size={32}
+            wordmark={!sidebarCollapsed}
+            name={appName || 'HAPulse'}
+            icon={appIcon}
+            hideIcon={appIconHidden}
+          />
         </div>
 
         {/* Nav list */}

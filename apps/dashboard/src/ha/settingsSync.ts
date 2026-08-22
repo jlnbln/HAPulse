@@ -85,6 +85,9 @@ const SNAPSHOT_KEYS = [
   'accentHue',
   'customization',
   'userName',
+  'appName',
+  'appIcon',
+  'appIconHidden',
   'sidebarCollapsed',
   'language',
 ] as const;
@@ -241,6 +244,9 @@ export function startHASettingsSync(): void {
       state.mode !== prevState.mode ||
       state.accentHue !== prevState.accentHue ||
       state.userName !== prevState.userName ||
+      state.appName !== prevState.appName ||
+      state.appIcon !== prevState.appIcon ||
+      state.appIconHidden !== prevState.appIconHidden ||
       state.sidebarCollapsed !== prevState.sidebarCollapsed ||
       state.customization !== prevState.customization ||
       state.language !== prevState.language
