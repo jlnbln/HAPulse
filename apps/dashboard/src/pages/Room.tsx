@@ -170,7 +170,7 @@ const DRAG_REORDER_KEYS: Record<SectionKey, TKey> = {
   vacuum: 'room.section.dragReorder.vacuum',
   sensor: 'room.section.dragReorder.sensor',
   binary_sensor: 'room.section.dragReorder.sensor',
-  other: 'room.section.dragReorder.other',
+  other: 'room.section.dragReorder.misc',
 };
 
 function SortableSectionInner({
@@ -261,7 +261,7 @@ const SECTION_LABEL_KEYS: Record<string, TKey> = {
   vacuum:       'room.section.label.vacuum',
   sensor:       'room.section.label.sensor',
   binary_sensor:'room.section.label.sensor',
-  other:        'room.section.label.other',
+  other:        'room.section.label.misc',
 };
 
 const SWITCH_DOMAINS = new Set(['switch', 'fan', 'input_boolean']);

@@ -44,7 +44,7 @@ function categorise(entities: HassEntity[]): MetricGroup[] {
     { id: 'disk',      labelKey: 'system.monitor.group.disk',      icon: <HardDrive size={14} strokeWidth={1.75} />, entities: disk },
     { id: 'network',   labelKey: 'system.monitor.group.network',   icon: <Network size={14} strokeWidth={1.75} />, entities: network },
     { id: 'system',    labelKey: 'system.monitor.group.system',    icon: <Clock size={14} strokeWidth={1.75} />, entities: system },
-    { id: 'other',     labelKey: 'system.monitor.group.other',     icon: <Activity size={14} strokeWidth={1.75} />, entities: other },
+    { id: 'other',     labelKey: 'system.monitor.group.misc',      icon: <Activity size={14} strokeWidth={1.75} />, entities: other },
   ];
 
   return groups.filter((g) => g.entities.length > 0);
