@@ -63,10 +63,12 @@ export function DashboardApp({ basename, accountMenu, demo = false }: DashboardA
     // still gets correct theming on first render.
     const s = useSettingsStore.getState();
     applyTheme(s.theme, s.mode, s.accentHue);
+    document.title = s.appName || 'HAPulse';
 
     // Keep the DOM in sync with future settings changes.
     useSettingsStore.subscribe((state) => {
       applyTheme(state.theme, state.mode, state.accentHue);
+      document.title = state.appName || 'HAPulse';
     });
 
     // Keep the DOM in sync with OS color-scheme changes (auto mode).

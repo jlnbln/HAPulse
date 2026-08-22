@@ -2,8 +2,8 @@
  * HAPulse dashboard — entry point.
  *
  * Order of operations:
- * 1. Apply saved theme immediately (before React hydrates) — prevents flash.
- * 2. Render <DashboardApp /> which handles connection init, theme subscription,
+ * 1. Apply saved theme + tab title immediately (before React hydrates) — prevents flash.
+ * 2. Render <DashboardApp /> which handles connection init, theme/title subscription,
  *    and system-mode watching via a one-time useEffect.
  */
 
@@ -32,18 +32,19 @@ function legacyTheme(value: string | undefined): { theme: ThemeName; mode: Theme
 }
 
 // ---------------------------------------------------------------------------
-// 1. Apply theme + mode before first paint — read directly from localStorage
-//    (the Zustand persist store hasn't hydrated yet at this point)
+// 1. Apply theme + mode + tab title before first paint — read directly from
+//    localStorage (the Zustand persist store hasn't hydrated yet at this point)
 // ---------------------------------------------------------------------------
 (function initTheme() {
   let theme: ThemeName = 'aurora';
   let mode: ThemeMode = 'light';
   let accentHue: number | undefined;
+  let appName: string | undefined;
   try {
     const raw = localStorage.getItem('hapulse:settings');
     if (raw) {
       const settings = JSON.parse(raw) as {
-        state?: { theme?: string; mode?: ThemeMode; accentHue?: number };
+        state?: { theme?: string; mode?: ThemeMode; accentHue?: number; appName?: string };
       };
       const legacy = legacyTheme(settings?.state?.theme);
       theme = legacy.theme;
@@ -52,12 +53,14 @@ function legacyTheme(value: string | undefined): { theme: ThemeName; mode: Theme
           ? settings.state.mode
           : legacy.mode;
       accentHue = settings?.state?.accentHue;
+      appName = settings?.state?.appName;
     }
   } catch {
     // fall through to defaults
   }
   // Always apply — sets data-theme/data-mode and tokens even on first run.
   applyTheme(theme, mode, accentHue);
+  document.title = appName || 'HAPulse';
 })();
 
 // ---------------------------------------------------------------------------
